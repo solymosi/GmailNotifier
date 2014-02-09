@@ -10,24 +10,29 @@ using System.Net;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace MailNotifier
+namespace GmailNotifier
 {
-    static partial class Gmail
+    static partial class Mail
     {
+        public const string FeedAddress = "https://mail.google.com/mail/feed/atom/";
+        public const string InboxAddress = "https://mail.google.com/mail/#inbox";
+        public const string AppPasswordAddress = "https://accounts.google.com/b/0/IssuedAuthSubTokens?hide_authsub=1";
+
         public static Settings Settings = new Settings();
         public static List<Email> Emails = new List<Email>();
+
         public static DateTime LastModified;
 
         public delegate void ReceivedDelegate(List<Email> Emails);
         public static event ReceivedDelegate Received = delegate { };
 
-        public static void RunCheck()
+        public static void RunUpdate()
         {
             XmlReader Reader = null;
 
             try
             {
-                Reader = XmlReader.Create(Settings.ServerAddress, new XmlReaderSettings
+                Reader = XmlReader.Create(FeedAddress, new XmlReaderSettings
                 {
                     XmlResolver = new XmlUrlResolver
                     {
@@ -35,15 +40,15 @@ namespace MailNotifier
                     }
                 });
             }
-            catch (WebException ex)
+            catch (WebException e)
             {
-                if (ex.Response != null && ((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.Unauthorized)
+                if (e.Response != null && ((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    throw new GmailException(GmailException.ErrorType.AccountError, "Invalid user name or password.");
+                    throw new UnauthorizedAccessException();
                 }
                 else
                 {
-                    throw new GmailException(GmailException.ErrorType.NetworkError, ex.Message);
+                    throw new Exception(e.Message);
                 }
             }
 
@@ -51,10 +56,12 @@ namespace MailNotifier
             XNamespace Namespace = Document.Root.Attribute("xmlns").Value;
 
             DateTime Modified = DateTime.Parse(Document.Root.Element(Namespace + "modified").Value);
+
             if (LastModified == Modified)
             {
                 return;
             }
+
             LastModified = Modified;
 
             List<Email> Unread = new List<Email>();
@@ -65,8 +72,8 @@ namespace MailNotifier
                 {
                     ID = Entry.Element(Namespace + "id").Value,
                     Subject = Entry.Element(Namespace + "title").Value,
-                    FromName = Entry.Element(Namespace + "author").Element(Namespace + "name").Value,
-                    FromAddress = Entry.Element(Namespace + "author").Element(Namespace + "email").Value,
+                    Sender = Entry.Element(Namespace + "author").Element(Namespace + "name").Value,
+                    From = Entry.Element(Namespace + "author").Element(Namespace + "email").Value,
                     Body = Entry.Element(Namespace + "summary").Value,
                     Date = DateTime.Parse(Entry.Element(Namespace + "issued").Value),
                     Link = Entry.Element(Namespace + "link").Attribute("href").Value,
@@ -75,6 +82,7 @@ namespace MailNotifier
             }
 
             List<Email> New = Unread.Where(e => Emails.Where(i => i.ID == e.ID).Count() == 0).ToList();
+
             if(New.Count() > 0)
             {
                 Received(New);
@@ -82,18 +90,5 @@ namespace MailNotifier
 
             Emails = Unread;
         }
-    }
-
-    public class GmailException : Exception
-    {
-        public ErrorType Type { get; set; }
-
-        public GmailException(ErrorType Type, string Message)
-            : base(Message)
-        {
-            this.Type = Type;
-        }
-
-        public enum ErrorType { NetworkError, AccountError }
     }
 }

@@ -4,22 +4,32 @@ using System.Text;
 using Microsoft.Win32;
 using System.Windows.Forms;
 
-namespace MailNotifier
+namespace GmailNotifier
 {
     [Serializable()]
     public class Settings
     {
         public string User = "";
         public string EncryptedPassword = "";
-        public string ServerAddress { get { return "https://mail.google.com/mail/feed/atom/"; } }
+
         public string Password
         {
-            get { return Encoding.UTF8.GetString(Convert.FromBase64String(EncryptedPassword)); }
-            set { EncryptedPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(value)); }
+            get
+            {
+                return Encoding.UTF8.GetString(Convert.FromBase64String(EncryptedPassword));
+            }
+            set
+            {
+                EncryptedPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+            }
         }
+
         public bool AutoStart
         {
-            get { return (Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run", "Gmail", null) != null); }
+            get
+            {
+                return (Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run", "Gmail", null) != null);
+            }
             set
             {
                 if (value) { Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run", "Gmail", Application.ExecutablePath); }
@@ -30,6 +40,10 @@ namespace MailNotifier
                 }
             }
         }
-        public bool Present { get { return this.Password != "" && this.User != ""; } }
+
+        public bool Present
+        {
+            get { return this.EncryptedPassword != "" && this.User != ""; }
+        }
     }
 }

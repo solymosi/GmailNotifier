@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-namespace MailNotifier
+namespace GmailNotifier
 {
     public partial class NotificationForm : Form
     {
@@ -18,8 +18,8 @@ namespace MailNotifier
         const int WS_EX_NOACTIVATE = 0x8000000;
         const int WS_EX_TOOLWINDOW = 0x00000080;
 
-        public List<Email> Emails = new List<Email>();
-        int CurrentNote = 0;
+        public List<string> Messages = new List<string>();
+        int CurrentMessage = 0;
 
         [DllImport("user32")]
         static extern bool AnimateWindow(IntPtr hwnd, int time, int flags);
@@ -53,31 +53,19 @@ namespace MailNotifier
         private void DisplayTimer_Tick(object sender, EventArgs e)
         {
 
-            if (CurrentNote == Emails.Count)
+            if (CurrentMessage == Messages.Count)
             {
                 this.Close();
                 return;
             }
-            ShowChange(Emails[CurrentNote]);
-            CurrentNote++;
+
+            ShowMessage(Messages[CurrentMessage]);
+            CurrentMessage++;
         }
 
-        private void ShowChange(Email Email)
+        private void ShowMessage(string Message)
         {
-            this.Height = 82;
-
-            /*Note First = Email.Type == ChangeType.Added ? Email.New : Email.Old;
-            Note Second = Email.Type == ChangeType.Modified ? Email.New : null;*/
-
-            Title.Text = Email.Subject;
-            Date.Text = Email.Date.ToShortDateString();
-            /*OldName.Text = First.Name + " (" + First.FriendlyType + ")";
-            OldNote.Text = First.Grade;
-            if (Email.Type == ChangeType.Modified)
-            {
-                NewName.Text = Second.Name + " (" + Second.FriendlyType + ")";
-                NewNote.Text = Second.Grade;
-            }*/
+            Content.Rtf = Message;
 
             this.Left = Screen.PrimaryScreen.WorkingArea.Width - this.Width;
             this.Top = Screen.PrimaryScreen.WorkingArea.Height - this.Height;

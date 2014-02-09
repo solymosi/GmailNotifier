@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Gmail Notifier")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Periodically checks your Gmail account for unread messages")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Solymosi Software")]
 [assembly: AssemblyProduct("Gmail Notifier")]

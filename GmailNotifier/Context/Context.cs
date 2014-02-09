@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace MailNotifier
+namespace GmailNotifier
 {
     public partial class Context : ApplicationContext
     {
@@ -20,46 +20,50 @@ namespace MailNotifier
             MainSynchronizationContext = new WindowsFormsSynchronizationContext();
             ThreadExit += new EventHandler(Context_ThreadExit);
 
+            InstallIcon();
+
             try
             {
                 LoadSettings();
-                Initialize();
             }
-            catch(ApplicationException)
+            catch
             {
-                InstallIcon(false);
+                Icon.Icon = Properties.Resources.Error;
+                SetIconStatus("Not configured");
+                return;
             }
+
+            Initialize();
         }
 
         public void Initialize()
         {
             if (Initialized) { return; }
 
-            Gmail.Received += new Gmail.ReceivedDelegate(ReceiveCallback);
-            RunCheck();
+            Mail.Received += new Mail.ReceivedDelegate(ReceiveCallback);
+
+            RunUpdate();
 
             UpdateTimer = new System.Timers.Timer(UpdateFrequency * 1000);
-            UpdateTimer.Elapsed += new System.Timers.ElapsedEventHandler(CheckTimer_Tick);
+            UpdateTimer.Elapsed += new System.Timers.ElapsedEventHandler(UpdateTimer_Tick);
             UpdateTimer.Start();
-
-            InstallIcon(true);
 
             Initialized = true;
         }
 
-        void OpenGmail_Click(object sender, EventArgs e)
+        void OpenMail_Click(object sender, EventArgs e)
         {
-            Process.Start(Gmail.Settings.ServerAddress);
+            Process.Start("https://mail.google.com/mail/#inbox");
         }
 
         void ShowUnread_Click(object sender, EventArgs e)
         {
-            ShowNotification(Gmail.Emails);
+            ShowNotification(Mail.Emails);
         }
 
         void CheckNow_Click(object sender, EventArgs e)
         {
-            RunCheck();
+            RunUpdate();
         }
 
         void Settings_Click(object sender, EventArgs e)
@@ -67,7 +71,6 @@ namespace MailNotifier
             try
             {
                 EditSettings();
-                RunCheck();
             }
             catch { }
         }
@@ -77,9 +80,9 @@ namespace MailNotifier
             ExitThread();
         }
 
-        void CheckTimer_Tick(object sender, System.Timers.ElapsedEventArgs e)
+        void UpdateTimer_Tick(object sender, System.Timers.ElapsedEventArgs e)
         {
-            RunCheck();
+            RunUpdate();
         }
 
         void Context_ThreadExit(object sender, EventArgs e)
@@ -89,9 +92,11 @@ namespace MailNotifier
 
         void ReceiveCallback(List<Email> Emails)
         {
-            if (Emails.Count > 0) { Tools.PlayNotificationSound(); }
+            if (Emails.Count > 0)
+            {
+                Tools.PlayNotificationSound();
+            }
             ShowNotification(Emails);
         }
-
     }
 }

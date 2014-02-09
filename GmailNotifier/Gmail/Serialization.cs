@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MailNotifier
+namespace GmailNotifier
 {
-    public static partial class Gmail
+    static partial class Mail
     {
         public const string SettingsFileName = "Settings.data";
 
