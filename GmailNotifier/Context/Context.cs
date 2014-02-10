@@ -10,8 +10,6 @@ namespace GmailNotifier
     {
         WindowsFormsSynchronizationContext MainSynchronizationContext;
 
-        bool Initialized = false;
-
         public Context()
         {
             MainSynchronizationContext = new WindowsFormsSynchronizationContext();
