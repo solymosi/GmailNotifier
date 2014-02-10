@@ -15,7 +15,7 @@ namespace GmailNotifier
         System.Timers.Timer UpdateTimer;
         Thread UpdateThread;
 
-        Response LastResult = Response.Success;
+        Response LastResult = Response.None;
 
         public bool Updating
         {
@@ -72,6 +72,6 @@ namespace GmailNotifier
             }
         }
 
-        enum Response { Success, AccessDenied, Error }
+        enum Response { None, Success, AccessDenied, Error }
     }
 }

@@ -56,6 +56,7 @@ namespace GmailNotifier
 
         void CheckNow_Click(object sender, EventArgs e)
         {
+            LastResult = Response.None;
             RunUpdate();
         }
 
