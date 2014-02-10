@@ -9,17 +9,29 @@ namespace GmailNotifier
 {
     public partial class Context
     {
+        public const int UpdateFrequency = 60;
+
         WindowsFormsSynchronizationContext UpdateSynchronizationContext;
+        System.Timers.Timer UpdateTimer;
         Thread UpdateThread;
+
+        Response LastResult = Response.Success;
 
         public bool Updating
         {
-            get { return this.UpdateThread != null && (this.UpdateThread.ThreadState == ThreadState.Running || this.UpdateThread.ThreadState == ThreadState.Background); }
+            get
+            {
+                return this.UpdateThread != null && (this.UpdateThread.ThreadState == ThreadState.Running || this.UpdateThread.ThreadState == ThreadState.Background);
+            }
         }
 
         public void RunUpdate()
         {
-            if (this.Updating) { return; }
+            if (this.Updating)
+            {
+                return;
+            }
+
             UpdateThread = new Thread(RunUpdateThread);
             UpdateThread.IsBackground = true;
             UpdateThread.Priority = ThreadPriority.Lowest;
@@ -36,17 +48,30 @@ namespace GmailNotifier
 
                 Icon.Icon = Mail.Emails.Count > 0 ? Properties.Resources.Unread : Properties.Resources.Read;
                 SetIconStatus(Mail.Emails.Count == 0 ? "No unread mail" : Mail.Emails.Count.ToString() + " unread mail");
+                LastResult = Response.Success;
             }
             catch (UnauthorizedAccessException)
             {
                 UpdateIcon(Properties.Resources.Error, "Invalid credentials");
-                ShowNotification("Invalid credentials", "The configured email address or password is invalid. Right-click the Gmail Notifier icon and choose Settings to update your credentials.");
+
+                if (LastResult != Response.AccessDenied)
+                {
+                    ShowNotification("Invalid credentials", "The configured email address or password is invalid. Right-click the Gmail Notifier icon and choose Settings to update your credentials.");
+                    LastResult = Response.AccessDenied;
+                }
             }
-            catch(Exception e)
+            catch (Exception)
             {
-                UpdateIcon(Properties.Resources.Error, e.Message != null && e.Message != "" ? e.Message : "Unable to check mail");
-                ShowNotification("Your inbox could not be checked", e.Message != null && e.Message != "" ? e.Message : "An unknown error occured.");
+                UpdateIcon(Properties.Resources.Error, "Unable to load your inbox");
+
+                if (LastResult != Response.Error)
+                {
+                    ShowNotification("Unable to load your inbox", "Gmail Notifier was unable to load the contents of your inbox. Make sure you are connected to the internet and verify that you can reach Gmail from your browser.");
+                    LastResult = Response.Error;
+                }
             }
         }
+
+        enum Response { Success, AccessDenied, Error }
     }
 }

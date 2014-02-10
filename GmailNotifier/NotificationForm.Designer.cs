@@ -38,7 +38,7 @@
             // DisplayTimer
             // 
             this.DisplayTimer.Enabled = true;
-            this.DisplayTimer.Interval = 5000;
+            this.DisplayTimer.Interval = 3000;
             this.DisplayTimer.Tick += new System.EventHandler(this.DisplayTimer_Tick);
             // 
             // Content
@@ -52,8 +52,10 @@
             this.Content.ReadOnly = true;
             this.Content.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.Content.Size = new System.Drawing.Size(299, 97);
-            this.Content.TabIndex = 0;
+            this.Content.TabIndex = 1;
+            this.Content.TabStop = false;
             this.Content.Text = "";
+            this.Content.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.Content_ContentsResized);
             // 
             // pictureBox1
             // 
@@ -85,7 +87,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MaYoR értesítő";
             this.TopMost = true;
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NotifierForm_FormClosing);
             this.Load += new System.EventHandler(this.NotifierForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -94,8 +95,8 @@
 
         #endregion
 
-        private System.Windows.Forms.Timer DisplayTimer;
         private System.Windows.Forms.RichTextBox Content;
         private System.Windows.Forms.PictureBox pictureBox1;
+        public System.Windows.Forms.Timer DisplayTimer;
     }
 }

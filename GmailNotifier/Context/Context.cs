@@ -8,9 +8,6 @@ namespace GmailNotifier
 {
     public partial class Context : ApplicationContext
     {
-        public const int UpdateFrequency = 60;
-
-        System.Timers.Timer UpdateTimer;
         WindowsFormsSynchronizationContext MainSynchronizationContext;
 
         bool Initialized = false;
@@ -18,37 +15,33 @@ namespace GmailNotifier
         public Context()
         {
             MainSynchronizationContext = new WindowsFormsSynchronizationContext();
-            ThreadExit += new EventHandler(Context_ThreadExit);
-
-            InstallIcon();
-
-            try
-            {
-                LoadSettings();
-            }
-            catch
-            {
-                Icon.Icon = Properties.Resources.Error;
-                SetIconStatus("Not configured");
-                return;
-            }
-
-            Initialize();
-        }
-
-        public void Initialize()
-        {
-            if (Initialized) { return; }
-
             Mail.Received += new Mail.ReceivedDelegate(ReceiveCallback);
-
-            RunUpdate();
+            ThreadExit += new EventHandler(Context_ThreadExit);
 
             UpdateTimer = new System.Timers.Timer(UpdateFrequency * 1000);
             UpdateTimer.Elapsed += new System.Timers.ElapsedEventHandler(UpdateTimer_Tick);
-            UpdateTimer.Start();
 
-            Initialized = true;
+            InstallIcon();
+
+            LoadSettings();
+
+            UpdateState();
+        }
+
+        public void UpdateState()
+        {
+            if (!Mail.Settings.Present)
+            {
+                UpdateTimer.Stop();
+                Mail.Emails.Clear();
+                Icon.Icon = Properties.Resources.Error;
+                SetIconStatus("Not configured");
+            }
+            else
+            {
+                UpdateTimer.Start();
+                RunUpdate();
+            }
         }
 
         void OpenMail_Click(object sender, EventArgs e)
@@ -68,11 +61,7 @@ namespace GmailNotifier
 
         void Settings_Click(object sender, EventArgs e)
         {
-            try
-            {
-                EditSettings();
-            }
-            catch { }
+            EditSettings();
         }
 
         void Exit_Click(object sender, EventArgs e)
@@ -96,6 +85,7 @@ namespace GmailNotifier
             {
                 Tools.PlayNotificationSound();
             }
+
             ShowNotification(Emails);
         }
     }

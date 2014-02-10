@@ -63,8 +63,11 @@ namespace GmailNotifier
 
         void UpdateIcon(Icon Icon, string Message)
         {
-            Program.Context.Icon.Icon = Icon;
-            SetIconStatus(Message);
+            MainSynchronizationContext.Post(delegate
+            {
+                Program.Context.Icon.Icon = Icon;
+                SetIconStatus(Message);
+            }, null);
         }
 
         public void RemoveIcon()

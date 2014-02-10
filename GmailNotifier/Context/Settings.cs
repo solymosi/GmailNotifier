@@ -9,12 +9,11 @@ namespace GmailNotifier
     {
         void LoadSettings()
         {
-            Mail.LoadSettings();
-
-            if (!Mail.Settings.Present)
+            try
             {
-                throw new Exception();
+                Mail.LoadSettings();
             }
+            catch { }
         }
 
         void EditSettings()
@@ -22,15 +21,13 @@ namespace GmailNotifier
             SettingsForm Form = new SettingsForm();
 
             Form.User.Text = Mail.Settings.User;
+            Form.Password.Text = Mail.Settings.Password;
             Form.AutoStart.Checked = Mail.Settings.Present ? Mail.Settings.AutoStart : true;
 
             if (Form.ShowDialog() == DialogResult.OK)
             {
                 Mail.Settings.User = Form.User.Text;
-                if (Mail.Settings.Password == "" || Form.Password.Text != "")
-                {
-                    Mail.Settings.Password = Form.Password.Text;
-                }
+                Mail.Settings.Password = Form.Password.Text;
                 Mail.Settings.AutoStart = Form.AutoStart.Checked;
 
                 SaveSettings();
@@ -42,9 +39,10 @@ namespace GmailNotifier
             try
             {
                 Mail.SaveSettings();
-                Initialize();
+
+                UpdateState();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Tools.ErrorMessage("Your settings could not be saved because of the following error:\r\n" + e.Message);
             }
