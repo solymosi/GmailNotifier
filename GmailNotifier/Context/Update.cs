@@ -9,7 +9,7 @@ namespace GmailNotifier
 {
     public partial class Context
     {
-        public const int UpdateFrequency = 60;
+        public const int UpdateFrequency = 30;
 
         WindowsFormsSynchronizationContext UpdateSynchronizationContext;
         System.Timers.Timer UpdateTimer;

@@ -11,7 +11,8 @@ namespace GmailNotifier
     {
         public NotificationForm Notification;
 
-        void ShowNotification(List<Email> Emails)
+        void ShowNotification(List<Email> Emails) { ShowNotification(Emails, 5000); }
+        void ShowNotification(List<Email> Emails, int Duration)
         {
             List<string> Messages = new List<string>();
 
@@ -31,7 +32,7 @@ namespace GmailNotifier
                 ID++;
             }
 
-            ShowNotification(Messages, 3000);
+            ShowNotification(Messages, Duration);
         }
 
         void ShowNotification(string Header, string Body) { ShowNotification(Header, Body, 15000); }
