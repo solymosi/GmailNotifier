@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using System.Xml.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Microsoft.Win32;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GmailNotifier
 {
@@ -10,11 +15,14 @@ namespace GmailNotifier
     {
         WindowsFormsSynchronizationContext MainSynchronizationContext;
 
+        bool SessionActive = true;
+
         public Context()
         {
             MainSynchronizationContext = new WindowsFormsSynchronizationContext();
             Mail.Received += new Mail.ReceivedDelegate(ReceiveCallback);
             ThreadExit += new EventHandler(Context_ThreadExit);
+            SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
 
             UpdateTimer = new System.Timers.Timer(UpdateFrequency * 1000);
             UpdateTimer.Elapsed += new System.Timers.ElapsedEventHandler(UpdateTimer_Tick);
@@ -70,7 +78,10 @@ namespace GmailNotifier
 
         void UpdateTimer_Tick(object sender, System.Timers.ElapsedEventArgs e)
         {
-            RunUpdate();
+            if (SessionActive)
+            {
+                RunUpdate();
+            }
         }
 
         void Context_ThreadExit(object sender, EventArgs e)
@@ -86,6 +97,25 @@ namespace GmailNotifier
             }
 
             ShowNotification(Emails);
+        }
+
+        void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+        {
+            if (e.Reason == SessionSwitchReason.ConsoleConnect || e.Reason == SessionSwitchReason.RemoteConnect || e.Reason == SessionSwitchReason.SessionUnlock)
+            {
+                SessionActive = true;
+
+                new Task(delegate
+                {
+                    Thread.Sleep(3000);
+                    RunUpdate();
+                }).Start();
+            }
+
+            if (e.Reason == SessionSwitchReason.ConsoleDisconnect || e.Reason == SessionSwitchReason.RemoteDisconnect || e.Reason == SessionSwitchReason.SessionLock)
+            {
+                SessionActive = false;
+            }
         }
     }
 }
