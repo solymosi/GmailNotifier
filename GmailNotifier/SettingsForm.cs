@@ -14,6 +14,7 @@ namespace GmailNotifier
         public SettingsForm()
         {
             InitializeComponent();
+            Text = "Gmail Notifier " + Application.ProductVersion + " - Configuration";
         }
 
         private void Cancel_Click(object sender, EventArgs e)
