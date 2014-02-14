@@ -42,12 +42,15 @@ namespace GmailNotifier
         {
             UpdateSynchronizationContext = new WindowsFormsSynchronizationContext();
 
+            SetIconStatus("Checking mail...");
+
             try
             {
                 Mail.RunUpdate();
 
                 Icon.Icon = Mail.Emails.Count > 0 ? Properties.Resources.Unread : Properties.Resources.Read;
                 SetIconStatus(Mail.Emails.Count == 0 ? "No unread mail" : Mail.Emails.Count.ToString() + " unread mail");
+
                 LastResult = Response.Success;
             }
             catch (UnauthorizedAccessException)
