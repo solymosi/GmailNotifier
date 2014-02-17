@@ -23,7 +23,7 @@ namespace GmailNotifier
                 Box.Font = new Font("Tahoma", 8.25F);
                 Box.AppendText(ID.ToString() + " of " + Emails.Count.ToString() + " » " + Tools.FormatDate(Email.Date) + " ");
                 Box.SelectionFont = new Font(Box.Font, FontStyle.Bold);
-                Box.AppendText(Email.Subject);
+                Box.AppendText(Email.Sender + "\r\n" + Email.Subject);
                 Box.SelectionFont = Box.Font;
                 Box.AppendText("\r\n" + Email.Body);
 
