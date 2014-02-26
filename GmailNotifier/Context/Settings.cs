@@ -7,6 +7,8 @@ namespace GmailNotifier
 {
     public partial class Context
     {
+        SettingsForm Form;
+
         void LoadSettings()
         {
             try
@@ -18,7 +20,13 @@ namespace GmailNotifier
 
         void EditSettings()
         {
-            SettingsForm Form = new SettingsForm();
+            if (Form != null && Form.Visible)
+            {
+                Form.Activate();
+                return;
+            }
+
+            Form = new SettingsForm();
 
             Form.User.Text = Mail.Settings.User;
             Form.Password.Text = Mail.Settings.Password;
