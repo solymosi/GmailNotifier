@@ -108,7 +108,11 @@ namespace GmailNotifier
                 new Task(delegate
                 {
                     Thread.Sleep(3000);
-                    RunUpdate();
+
+                    if (UpdateTimer.Enabled)
+                    {
+                        UpdateTimer_Tick(this, null);
+                    }
                 }).Start();
             }
 
