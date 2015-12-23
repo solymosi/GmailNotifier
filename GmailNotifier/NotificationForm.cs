@@ -20,6 +20,7 @@ namespace GmailNotifier
         public NotificationForm()
         {
             InitializeComponent();
+            this.Text = Application.ProductName;
         }
 
         protected override CreateParams CreateParams

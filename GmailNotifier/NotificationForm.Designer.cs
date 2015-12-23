@@ -85,7 +85,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MaYoR értesítő";
+            this.Text = "";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.NotifierForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
